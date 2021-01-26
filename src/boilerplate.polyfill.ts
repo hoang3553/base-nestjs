@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention,@typescript-eslint/tslint/config */
 import 'source-map-support/register';
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Brackets, QueryBuilder, SelectQueryBuilder } from 'typeorm';
 
 import { AbstractEntity } from './common/abstract.entity';

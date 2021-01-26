@@ -29,7 +29,6 @@ export class UserRegisterDto {
   readonly email: string;
 
   @IsString()
-  @MinLength(6)
   @ApiProperty({ minLength: 6 })
   readonly password: string;
 

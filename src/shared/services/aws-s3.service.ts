@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import * as AWS from 'aws-sdk';
-import * as mime from 'mime-types';
+import AWS from 'aws-sdk';
+import mime from 'mime-types';
 
 import { IFile } from '../../interfaces/IFile';
 import { ConfigService } from './config.service';

@@ -1,4 +1,4 @@
-import * as requestContext from 'request-context';
+import requestContext from 'request-context';
 
 export class ContextService {
   private static readonly _nameSpace = 'request';

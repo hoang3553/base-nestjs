@@ -2,13 +2,10 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import {
-  ExpressAdapter,
-  NestExpressApplication,
-} from '@nestjs/platform-express';
-import * as compression from 'compression';
-import * as RateLimit from 'express-rate-limit';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import helmet from 'fastify-helmet';
 import {
   initializeTransactionalContext,
   patchTypeORMRepositoryWithBaseRepository,
@@ -24,21 +21,28 @@ import { setupSwagger } from './viveo-swagger';
 async function bootstrap() {
   initializeTransactionalContext();
   patchTypeORMRepositoryWithBaseRepository();
-  const app = await NestFactory.create<NestExpressApplication>(
+  const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new ExpressAdapter(),
-    { cors: true },
+    new FastifyAdapter({ logger: true }),
   );
-  app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  app.use(helmet());
-  app.use(
-    RateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
-    }),
-  );
-  app.use(compression());
-  app.use(morgan('combined'));
+
+  app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`, `'unsafe-inline'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+      },
+    },
+  });
+
+  //   app.use(
+  //     RateLimit({
+  //       windowMs: 15 * 60 * 1000, // 15 minutes
+  //       max: 100, // limit each IP to 100 requests per windowMs
+  //     }),
+  //   );
 
   const reflector = app.get(Reflector);
 
@@ -62,16 +66,16 @@ async function bootstrap() {
 
   const configService = app.select(SharedModule).get(ConfigService);
 
-  app.connectMicroservice({
-    transport: Transport.TCP,
-    options: {
-      port: configService.getNumber('TRANSPORT_PORT'),
-      retryAttempts: 5,
-      retryDelay: 3000,
-    },
-  });
+  //   app.connectMicroservice({
+  //     transport: Transport.TCP,
+  //     options: {
+  //       port: configService.getNumber('TRANSPORT_PORT'),
+  //       retryAttempts: 5,
+  //       retryDelay: 3000,
+  //     },
+  //   });
 
-  await app.startAllMicroservicesAsync();
+  //   await app.startAllMicroservicesAsync();
 
   if (['development', 'staging'].includes(configService.nodeEnv)) {
     setupSwagger(app);
