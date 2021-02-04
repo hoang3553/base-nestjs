@@ -1,9 +1,8 @@
-import './boilerplate.polyfill';
-
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import path from 'path';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { contextMiddleware } from './middlewares';
 import { AuthModule } from './modules/auth/auth.module';
@@ -17,11 +16,7 @@ import { SharedModule } from './shared/shared.module';
     AuthModule,
     UserModule,
     MathModule,
-    TypeOrmModule.forRootAsync({
-      imports: [SharedModule],
-      useFactory: (configService: ConfigService) => configService.typeOrmConfig,
-      inject: [ConfigService],
-    }),
+    MongooseModule.forRoot('mongodb://localhost:27017/nest'),
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         fallbackLanguage: configService.fallbackLanguage,

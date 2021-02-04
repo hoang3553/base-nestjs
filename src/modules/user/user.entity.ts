@@ -1,31 +1,34 @@
-import { Column, Entity } from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Document } from 'mongoose';
 
-import { AbstractEntity } from '../../common/abstract.entity';
-import { RoleType } from '../../common/constants/role-type';
-import { UserDto } from './dto/UserDto';
+export type CatDocument = User & Document;
 
-@Entity({ name: 'users' })
-export class UserEntity extends AbstractEntity<UserDto> {
-  @Column({ nullable: true })
+@Schema()
+export class User {
+  @ApiPropertyOptional()
+  @Prop()
   firstName: string;
 
-  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @Prop()
   lastName: string;
 
-  @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
-  role: RoleType;
-
-  @Column({ unique: true, nullable: true })
+  @ApiPropertyOptional()
+  @Prop()
   email: string;
 
-  @Column({ nullable: true })
+  @Prop({ hidden: true })
   password: string;
 
-  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @Prop()
+  age: number;
+
+  @ApiPropertyOptional()
+  @Prop()
   phone: string;
-
-  @Column({ nullable: true })
-  avatar: string;
-
-  dtoClass = UserDto;
 }
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const UserEntity = SchemaFactory.createForClass(User);
