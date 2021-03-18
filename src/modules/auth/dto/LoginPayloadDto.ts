@@ -3,16 +3,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserDto } from '../../user/dto/UserDto';
-import { TokenPayloadDto } from './TokenPayloadDto';
 
 export class LoginPayloadDto {
   @ApiProperty({ type: UserDto })
   user: UserDto;
-  @ApiProperty({ type: TokenPayloadDto })
-  token: TokenPayloadDto;
+  @ApiProperty()
+  accessToken: string;
+  @ApiProperty()
+  resetToken: string;
 
-  constructor(user: UserDto, token: TokenPayloadDto) {
+  constructor(user: UserDto, accessToken: string, resetToken: string) {
     this.user = user;
-    this.token = token;
+    this.accessToken = accessToken;
+    this.resetToken = resetToken;
   }
 }

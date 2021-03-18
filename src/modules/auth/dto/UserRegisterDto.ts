@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-} from 'class-validator';
-import { Column } from 'typeorm';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class UserRegisterDto {
   @IsString()
@@ -28,10 +21,4 @@ export class UserRegisterDto {
   @IsString()
   @ApiProperty({ minLength: 6 })
   readonly password: string;
-
-  @Column()
-  @IsPhoneNumber('ZZ')
-  @IsOptional()
-  @ApiProperty()
-  phone: string;
 }

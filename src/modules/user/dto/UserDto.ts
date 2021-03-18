@@ -4,7 +4,6 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { RoleType } from '../../../common/constants/role-type';
 import { AbstractDto } from '../../../common/dto/AbstractDto';
-import { UserEntity } from '../user.entity';
 
 export class UserDto extends AbstractDto {
   @ApiPropertyOptional()
@@ -28,7 +27,7 @@ export class UserDto extends AbstractDto {
   @ApiPropertyOptional()
   phone: string;
 
-  constructor(user: UserEntity) {
+  constructor(user) {
     super(user);
     this.firstName = user.firstName;
     this.lastName = user.lastName;

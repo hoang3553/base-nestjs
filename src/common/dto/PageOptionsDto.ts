@@ -41,11 +41,7 @@ export class PageOptionsDto {
   @Min(10)
   @Max(50)
   @IsOptional()
-  readonly take: number = 10;
-
-  get skip(): number {
-    return (this.page - 1) * this.take;
-  }
+  readonly perPage: number = 10;
 
   @ApiPropertyOptional()
   @IsString()

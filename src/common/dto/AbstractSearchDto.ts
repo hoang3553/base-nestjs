@@ -3,7 +3,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-import { ToInt } from '../../decorators/transforms.decorator';
+import { ToInt } from '../../decorators';
 
 export class AbstractSearchDto {
   @ApiProperty()
@@ -21,9 +21,5 @@ export class AbstractSearchDto {
   @IsNumber()
   @IsOptional()
   @ToInt()
-  take = 10;
-
-  get skip() {
-    return (this.page - 1) * this.take;
-  }
+  perPage = 10;
 }

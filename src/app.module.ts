@@ -1,21 +1,19 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import path from 'path';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { contextMiddleware } from './middlewares';
 import { AuthModule } from './modules/auth/auth.module';
-import { MathModule } from './modules/math/math.module';
-import { UserModule } from './modules/user/user.module';
+import { CatsModule } from './modules/cat/cats.module';
+// import { UserModule } from './modules/user/user.module';
 import { ConfigService } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
     AuthModule,
-    UserModule,
-    MathModule,
+    // UserModule,
+    CatsModule,
     MongooseModule.forRoot('mongodb://localhost:27017/nest'),
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
@@ -29,10 +27,7 @@ import { SharedModule } from './shared/shared.module';
       parser: I18nJsonParser,
       inject: [ConfigService],
     }),
+    CatsModule,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-    consumer.apply(contextMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

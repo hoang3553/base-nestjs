@@ -5,10 +5,6 @@ import { UserNotFoundException } from '../../exceptions/user-not-found.exception
 import { ContextService } from '../../providers/context.service';
 import { UtilsService } from '../../providers/utils.service';
 import { ConfigService } from '../../shared/services/config.service';
-import { UserDto } from '../user/dto/UserDto';
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { TokenPayloadDto } from './dto/TokenPayloadDto';
 import { UserLoginDto } from './dto/UserLoginDto';
 
 @Injectable()
@@ -18,14 +14,12 @@ export class AuthService {
   constructor(
     public readonly jwtService: JwtService,
     public readonly configService: ConfigService,
-    public readonly userService: UserService,
   ) {}
 
-  async createToken(user: UserEntity | UserDto): Promise<TokenPayloadDto> {
-    return new TokenPayloadDto({
-      expiresIn: this.configService.getNumber('JWT_EXPIRATION_TIME'),
-      accessToken: await this.jwtService.signAsync({ id: user.id }),
-    });
+  createToken() {
+    return {
+      accessToken: this.jwtService.sign({ id: 'abc', userId: '1234' }),
+    };
   }
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {

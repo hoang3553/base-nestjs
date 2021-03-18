@@ -1,28 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type CatDocument = User & Document;
+export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-  @Prop()
+  @Prop({ required: true })
   firstName: string;
 
-  @Prop()
+  @Prop({ required: true })
   lastName: string;
 
-  @Prop()
+  @Prop({ required: true })
   email: string;
 
-  @Prop({ hidden: true })
+  @Prop({ required: true, hidden: true })
   password: string;
-
-  @Prop()
-  age: number;
-
-  @Prop()
-  phone: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const UserEntity = SchemaFactory.createForClass(User);
+export const UserSchema = SchemaFactory.createForClass(User);
