@@ -7,33 +7,40 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Auth } from '../../decorators';
 
 import { CatsService } from './cats.service';
-import { CatDto, CreateCatDto, UpdateCatDto } from './dto';
+import { CreateCatDto, CatPagingDto, UpdateCatDto } from './dto';
+import { Cat } from './schemas/cat.entity';
 
-@Controller('admin/cats')
+@Controller('cats')
 @ApiTags('cats')
 export class CatsController {
   constructor(private readonly _catsService: CatsService) {}
 
   @Post()
-  @ApiOkResponse({
-    type: CatDto,
+  @ApiCreatedResponse({
+    type: Cat,
     description: 'Cat',
   })
+  @Auth()
   createOne(@Body() createCatDto: CreateCatDto) {
     return this._catsService.createOne(createCatDto);
   }
 
   @Get()
-  findAll() {
+  @ApiOkResponse({
+    type: CatPagingDto,
+    description: 'CatList',
+  })
+  findAll(): CatPagingDto {
     return this._catsService.findAll();
   }
 
   @Get(':id')
   @ApiOkResponse({
-    type: CatDto,
+    type: Cat,
     description: 'Cat',
   })
   findOne(@Param('id') id: string) {
@@ -42,7 +49,7 @@ export class CatsController {
 
   @Put(':id')
   @ApiOkResponse({
-    type: CatDto,
+    type: Cat,
     description: 'Cat',
   })
   updateOne(@Param('id') id: string, @Body() updateCatDto: UpdateCatDto) {

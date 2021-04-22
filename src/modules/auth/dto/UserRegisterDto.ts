@@ -5,20 +5,20 @@ export class UserRegisterDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  readonly firstName: string;
+  firstName: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  readonly lastName: string;
+  lastName: string;
 
   @IsString()
   @IsEmail()
   @IsNotEmpty()
   @ApiProperty()
-  readonly email: string;
+  email: string;
 
   @IsString()
   @ApiProperty({ minLength: 6 })
-  readonly password: string;
+  password: string;
 }

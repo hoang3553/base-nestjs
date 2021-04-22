@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
@@ -17,21 +18,26 @@ export class UserService {
     public readonly awsS3Service: AwsS3Service,
   ) {}
 
-  //   /**
-  //    * Find single user
-  //    */
-  //   findOne(findData: FindConditions<UserEntity>): Promise<UserEntity> {
-  //     return this.userRepository.findOne(findData);
-  //   }
-  //   async findByUsernameOrEmail(
-  //     options: Partial<{ username: string; email: string }>,
-  //   ): Promise<UserEntity | undefined> {
+  /**
+   * Find single user
+   */
+  async findOne(id): Promise<User> {
+    return this._model.findById(id);
+  }
 
-  //     return queryBuilder.getOne();
-  //   }
+  async findByUsernameOrEmail(
+    options: Partial<{ email: string }>,
+  ): Promise<User | undefined> {
+    return this._model.findOne({
+      email: options.email,
+    });
+  }
 
   async createUser(userRegisterDto: UserRegisterDto) {
-
+    if (userRegisterDto.password) {
+      userRegisterDto.password = bcrypt.hashSync(userRegisterDto.password);
+    }
+    return this._model.create(userRegisterDto);
   }
 
   async getUsers(pageOptionsDto: UsersPageOptionsDto): Promise<UsersPageDto> {

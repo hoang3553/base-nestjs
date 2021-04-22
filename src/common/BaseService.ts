@@ -1,27 +1,34 @@
-export class BaseService<T, V, X> {
+import { Document, Model } from 'mongoose';
+
+export abstract class BaseService<T extends Document, V, X> {
   // eslint-disable-next-line @typescript-eslint/tslint/config
-  _model: any;
 
-  async createOne(createBody: V): Promise<T> {
-    const result = await this._model.create(createBody);
-    return result.toJSON();
+  /**
+   * The constructor must receive the injected model from the child service in
+   * order to provide all the proper base functionality.
+   *
+   * @param {Model} model - The injected model.
+   */
+  constructor(private readonly _model: Model<T>) {}
+
+  async createOne(createBody: V) {
+    return this._model.create(createBody);
   }
 
-  findAll(): Promise<T[]> {
-    return this._model.find().lean();
+  findAll() {
+    return this._model.find();
   }
 
-  findOne(id: string): Promise<T[]> {
-    return this._model.findById(id).lean();
+  async findOne(id: string) {
+    return this._model.findById(id);
   }
 
-  async updateOne(id: string, updateBody: X): Promise<T> {
+  async updateOne(id: string, updateBody: X) {
     const record = await this._model.findById(id);
     if (!record) {
       throw Error('');
     }
-    const result = await this._model.findByIdAndUpdate(id, updateBody);
-    return result.toJSON();
+    return this._model.findByIdAndUpdate(id, updateBody);
   }
 
   async removeOne(id: string): Promise<string> {

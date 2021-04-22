@@ -5,6 +5,7 @@ import { UserNotFoundException } from '../../exceptions/user-not-found.exception
 import { ContextService } from '../../providers/context.service';
 import { UtilsService } from '../../providers/utils.service';
 import { ConfigService } from '../../shared/services/config.service';
+import { UserService } from '../user/user.service';
 import { UserLoginDto } from './dto/UserLoginDto';
 
 @Injectable()
@@ -14,12 +15,11 @@ export class AuthService {
   constructor(
     public readonly jwtService: JwtService,
     public readonly configService: ConfigService,
+    public readonly userService: UserService,
   ) {}
 
-  createToken() {
-    return {
-      accessToken: this.jwtService.sign({ id: 'abc', userId: '1234' }),
-    };
+  createToken(data) {
+    return this.jwtService.sign(data);
   }
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {

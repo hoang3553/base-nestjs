@@ -7,8 +7,14 @@ import { CreateCatDto, UpdateCatDto } from './dto';
 import { Cat, CatDocument } from './schemas/cat.entity';
 
 @Injectable()
-export class CatsService extends BaseService<Cat, CreateCatDto, UpdateCatDto> {
-  constructor(@InjectModel(Cat.name) _model: Model<CatDocument>) {
-    super();
+export class CatsService extends BaseService<
+  CatDocument,
+  CreateCatDto,
+  UpdateCatDto
+> {
+  constructor(
+    @InjectModel(Cat.name) private readonly _catModel: Model<CatDocument>,
+  ) {
+    super(_catModel);
   }
 }

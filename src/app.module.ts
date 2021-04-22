@@ -1,17 +1,15 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import path from 'path';
 
-import { AuthModule } from './modules/auth/auth.module';
 import { CatsModule } from './modules/cat/cats.module';
-// import { UserModule } from './modules/user/user.module';
 import { ConfigService } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
-    AuthModule,
+    // AuthModule,
     // UserModule,
     CatsModule,
     MongooseModule.forRoot('mongodb://localhost:27017/nest'),
