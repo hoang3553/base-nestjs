@@ -1,4 +1,6 @@
-import { Document, Model } from 'mongoose';
+import { Document } from 'mongoose';
+
+import { IModel } from '../interfaces';
 
 export abstract class BaseService<T extends Document, V, X> {
   // eslint-disable-next-line @typescript-eslint/tslint/config
@@ -9,14 +11,14 @@ export abstract class BaseService<T extends Document, V, X> {
    *
    * @param {Model} model - The injected model.
    */
-  constructor(private readonly _model: Model<T>) {}
+  constructor(private readonly _model: IModel<T>) {}
 
   async createOne(createBody: V) {
     return this._model.create(createBody);
   }
 
-  findAll() {
-    return this._model.find();
+  findAll(query) {
+    return this._model.queryBuilder(query);
   }
 
   async findOne(id: string) {

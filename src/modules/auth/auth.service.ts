@@ -1,17 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { UserNotFoundException } from '../../exceptions/user-not-found.exception';
-import { ContextService } from '../../providers/context.service';
 import { UtilsService } from '../../providers/utils.service';
-import { ConfigService } from '../../shared/services/config.service';
 import { UserService } from '../user/user.service';
-import { UserLoginDto } from './dto/UserLoginDto';
+import { User } from './../user/schemas/user.entity';
+import { ChangePasswordDto, UserLoginDto } from './dto';
 
 @Injectable()
 export class AuthService {
-  private static _authUserKey = 'user_key';
-
   constructor(
     public readonly jwtService: JwtService,
     public readonly configService: ConfigService,
@@ -19,11 +16,20 @@ export class AuthService {
   ) {}
 
   createToken(data) {
-    return this.jwtService.sign(data);
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    const { _id, role, email, firstName, lastName } = data;
+    return this.jwtService.sign({
+      _id,
+      email,
+      role,
+      firstName,
+      lastName,
+      id: _id,
+    });
   }
 
-  async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {
-    const user = await this.userService.findOne({
+  async validateUser(userLoginDto: UserLoginDto): Promise<User> {
+    const user = await this.userService.findByUsernameOrEmail({
       email: userLoginDto.email,
     });
     const isPasswordValid = await UtilsService.validateHash(
@@ -31,16 +37,58 @@ export class AuthService {
       user && user.password,
     );
     if (!user || !isPasswordValid) {
-      throw new UserNotFoundException();
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'Email or password is incorrect',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
+    user.password = undefined;
     return user;
   }
 
-  static setAuthUser(user: UserEntity) {
-    ContextService.set(AuthService._authUserKey, user);
+  async changePassword(userId, body: ChangePasswordDto) {
+    const user = await this.userService.findOneWithPassword(userId);
+    const isPasswordValid = await UtilsService.validateHash(
+      body.oldPassword,
+      user && user.password,
+    );
+    if (!isPasswordValid) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Password is incorrect',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const hashNewPassword = UtilsService.generateHash(body.newPassword);
+    await this.userService.updateOne(userId, {
+      password: hashNewPassword,
+    });
+    return { success: true };
   }
 
-  static getAuthUser(): UserEntity {
-    return ContextService.get(AuthService._authUserKey);
+  async forgotPassword(email: string) {
+    const user = await this.userService.findByUsernameOrEmail({ email });
+    if (!user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email not found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const code = UtilsService.generateRandomString(4);
+    // Set email expire date to 1 hour
+    const expiryDate = new Date(new Date().setHours(new Date().getHours() + 1));
+    await this.userService.updateOne(user._id, {
+      resetPasswordToken: code,
+      resetPasswordExpire: expiryDate.toISOString(),
+    });
+    return { message: 'Reset password email has been sent' };
   }
 }

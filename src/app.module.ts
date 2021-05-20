@@ -1,31 +1,47 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import path from 'path';
 
+import configuration from './config';
+import { AuthModule } from './modules/auth/auth.module';
 import { CatsModule } from './modules/cat/cats.module';
-import { ConfigService } from './shared/services/config.service';
-import { SharedModule } from './shared/shared.module';
+import { UsersModule } from './modules/user/user.module';
+import { queryBuilder } from './providers/queryBuilder';
 
 @Module({
   imports: [
-    // AuthModule,
-    // UserModule,
+    ConfigModule.forRoot({
+      load: [configuration],
+      cache: true,
+      isGlobal: true,
+    }),
+    AuthModule,
+    UsersModule,
     CatsModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/nest'),
-    I18nModule.forRootAsync({
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        fallbackLanguage: configService.fallbackLanguage,
-        parserOptions: {
-          path: path.join(__dirname, '/i18n/'),
-          watch: configService.isDevelopment,
+        uri: configService.get<string>('database.url'),
+        connectionFactory: (connection) => {
+          connection.plugin(queryBuilder);
+          return connection;
         },
       }),
-      imports: [SharedModule],
+      inject: [ConfigService],
+    }),
+    I18nModule.forRootAsync({
+      useFactory: () => ({
+        fallbackLanguage: 'en',
+        parserOptions: {
+          path: path.join(__dirname, '/i18n/'),
+          watch: false,
+        },
+      }),
       parser: I18nJsonParser,
       inject: [ConfigService],
     }),
-    CatsModule,
   ],
 })
 export class AppModule {}

@@ -1,22 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
 
-import { AwsS3Service } from '../../shared/services/aws-s3.service';
-import { ValidatorService } from '../../shared/services/validator.service';
+import { IModel } from '../../interfaces';
 import { UserRegisterDto } from '../auth/dto/UserRegisterDto';
 import { UsersPageDto } from './dto/UsersPageDto';
-import { UsersPageOptionsDto } from './dto/UsersPageOptionsDto';
-import { User, UserDocument } from './schemas/user.entity';
+import { User, USER_ROLES, UserDocument } from './schemas/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel(User.name) private _model: Model<UserDocument>,
-    public readonly validatorService: ValidatorService,
-    public readonly awsS3Service: AwsS3Service,
-  ) {}
+  constructor(@InjectModel(User.name) private _model: IModel<UserDocument>) {}
 
   /**
    * Find single user
@@ -25,25 +18,36 @@ export class UserService {
     return this._model.findById(id);
   }
 
+  async findOneWithPassword(id): Promise<User> {
+    return this._model.findById(id).select('+password');
+  }
+
   async findByUsernameOrEmail(
     options: Partial<{ email: string }>,
   ): Promise<User | undefined> {
-    return this._model.findOne({
-      email: options.email,
-    });
+    return this._model
+      .findOne({
+        email: options.email,
+      })
+      .select('+password');
+  }
+
+  async updateOne(id, payload): Promise<User> {
+    return this._model.findByIdAndUpdate(id, payload, { new: true });
   }
 
   async createUser(userRegisterDto: UserRegisterDto) {
     if (userRegisterDto.password) {
       userRegisterDto.password = bcrypt.hashSync(userRegisterDto.password);
     }
-    return this._model.create(userRegisterDto);
+    // Default set role to CUSTOMER
+    return this._model.create({
+      ...userRegisterDto,
+      role: USER_ROLES.CUSTOMER,
+    });
   }
 
-  async getUsers(pageOptionsDto: UsersPageOptionsDto): Promise<UsersPageDto> {
-    const queryBuilder = this._model.createQueryBuilder('user');
-    const [users, pageMetaDto] = await queryBuilder.paginate(pageOptionsDto);
-
-    return new UsersPageDto(users.toDtos(), pageMetaDto);
+  getUsers(query): Promise<UsersPageDto> {
+    return this._model.queryBuilder(query);
   }
 }

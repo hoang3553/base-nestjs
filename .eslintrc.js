@@ -96,13 +96,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/naming-convention': [
-            'error',
-            {
-                selector: 'default', format: ['camelCase', 'PascalCase', 'snake_case', 'UPPER_CASE'], 'filter': {
-                    'regex': '^_.*$',
-                    'match': false,
-                },
-            },
+            'off',
             {
                 selector: 'variable',
                 format: ['camelCase', 'UPPER_CASE'],
@@ -115,6 +109,10 @@ module.exports = {
             {
                 selector: 'typeLike',
                 format: ['PascalCase'],
+            },
+            {
+                'type': 'enumMember',
+                'format': 'UPPER_CASE',
             },
             {
                 selector: 'memberLike',

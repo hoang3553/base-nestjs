@@ -1,5 +1,6 @@
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -7,8 +8,6 @@ import {
 import helmet from 'fastify-helmet';
 
 import { AppModule } from './app.module';
-import { ConfigService } from './shared/services/config.service';
-import { SharedModule } from './shared/shared.module';
 import { setupSwagger } from './viveo-swagger';
 
 async function bootstrap() {
@@ -21,10 +20,10 @@ async function bootstrap() {
   app.register(helmet, {
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: [`'self'`],
-        styleSrc: [`'self'`, `'unsafe-inline'`],
-        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'validator.swagger.io'],
+        scriptSrc: ["'self'", "https: 'unsafe-inline'"],
       },
     },
   });
@@ -36,39 +35,21 @@ async function bootstrap() {
   //     }),
   //   );
 
-  const reflector = app.get(Reflector);
+  //   const reflector = app.get(Reflector);
 
-//   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+  //   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      dismissDefaultMessages: true,
-      validationError: {
-        target: false,
-      },
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ forbidNonWhitelisted: true }));
 
-  const configService = app.select(SharedModule).get(ConfigService);
+  const configService = app.get(ConfigService);
 
-  //   app.connectMicroservice({
-  //     transport: Transport.TCP,
-  //     options: {
-  //       port: configService.getNumber('TRANSPORT_PORT'),
-  //       retryAttempts: 5,
-  //       retryDelay: 3000,
-  //     },
-  //   });
-
-  //   await app.startAllMicroservicesAsync();
-
-  if (['development', 'staging'].includes(configService.nodeEnv)) {
+  if (
+    ['development', 'staging'].includes(configService.get<string>('appEnv'))
+  ) {
     setupSwagger(app);
   }
 
-  const port = configService.getNumber('PORT');
+  const port = configService.get<string>('port');
   await app.listen(port);
 
   console.info(`server running on port ${port}`);

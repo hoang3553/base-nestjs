@@ -6,12 +6,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Auth } from '../../decorators';
 
+import { Auth } from '../../decorators';
+import { PageOptionsDto } from './../../common/dto/PageOptionsDto';
 import { CatsService } from './cats.service';
-import { CreateCatDto, CatPagingDto, UpdateCatDto } from './dto';
+import { CatPagingDto, CreateCatDto, UpdateCatDto } from './dto';
 import { Cat } from './schemas/cat.entity';
 
 @Controller('cats')
@@ -34,8 +36,9 @@ export class CatsController {
     type: CatPagingDto,
     description: 'CatList',
   })
-  findAll(): CatPagingDto {
-    return this._catsService.findAll();
+  findAll(@Query() query: PageOptionsDto): CatPagingDto {
+    // console.log(JSON.parse(query.filter))
+    return this._catsService.findAll(query);
   }
 
   @Get(':id')

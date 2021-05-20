@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
@@ -12,7 +14,14 @@ import { Auth, AuthUser } from '../../decorators';
 import { UserDto } from '../user/dto/UserDto';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
-import { LoginPayloadDto, UserRegisterDto } from './dto';
+import {
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginPayloadDto,
+  UserInfoDto,
+  UserLoginDto,
+  UserRegisterDto,
+} from './dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -28,10 +37,13 @@ export class AuthController {
     type: LoginPayloadDto,
     description: 'User info with access token',
   })
-  userLogin() {
-    const token = this.authService.createToken(createdUser);
+  async userLogin(@Body() userLogin: UserLoginDto) {
+    const user = await this.authService.validateUser(userLogin);
+    const token = this.authService.createToken(user);
     return {
       accessToken: token,
+      data: user,
+      message: 'LOGIN_SUCCESS',
     };
   }
 
@@ -44,18 +56,74 @@ export class AuthController {
   async userRegister(
     @Body() userRegisterDto: UserRegisterDto,
   ): Promise<LoginPayloadDto> {
+    const existUser = await this.userService.findByUsernameOrEmail({
+      email: userRegisterDto.email,
+    });
+    if (existUser) {
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'Sorry! This email has been used',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const createdUser = await this.userService.createUser(userRegisterDto);
     const token = this.authService.createToken(createdUser);
+    // Remove password field when return data to client
+    createdUser.password = undefined;
     return {
       accessToken: token,
-      user: createdUser,
+      data: createdUser,
+      message: 'LOGIN_SUCCESS',
     };
   }
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: UserDto, description: 'current user info' })
+  @Auth()
+  @ApiOkResponse({ type: UserDto, description: 'Current user info' })
   getCurrentUser(@AuthUser() user) {
-    return user;
+    return this.userService.findOne(user.id);
+  }
+
+  @Put('me')
+  @HttpCode(HttpStatus.OK)
+  @Auth()
+  @ApiOkResponse({ type: UserDto, description: 'Update user info' })
+  updateCurrentUser(@AuthUser() user, @Body() body: UserInfoDto) {
+    return this.userService.updateOne(user.id, body);
+  }
+
+  @Put('/me/changePassword')
+  @HttpCode(HttpStatus.OK)
+  @Auth()
+  @ApiOkResponse({
+    type: UserDto,
+    description: 'Change password for authenticated user',
+  })
+  changePassword(@AuthUser() user, @Body() body: ChangePasswordDto) {
+    return this.authService.changePassword(user.id, body);
+  }
+
+  @Post('/forgotPassword')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: UserDto,
+    description: 'Send email forget password for particular email',
+  })
+  forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.authService.forgotPassword(body.email);
+  }
+
+  @Post('/resetPassword')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: UserDto,
+    description: 'Reset password for particular email',
+  })
+  resetPassword() {
+    return true;
   }
 }
