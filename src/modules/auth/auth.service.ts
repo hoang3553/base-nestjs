@@ -40,7 +40,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.UNAUTHORIZED,
-          message: 'Email or password is incorrect',
+          messageCode: 'auth.email_pass_incorrect',
         },
         HttpStatus.UNAUTHORIZED,
       );

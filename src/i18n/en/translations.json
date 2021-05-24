@@ -1,5 +1,6 @@
 {
     "keywords": {
         "admin": "Administrator"
-    }
+    },
+    "EMAIL_PASSWORD_INCORRECT": "Email or password incorrect"
 }

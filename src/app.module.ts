@@ -1,9 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
-import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
+import {
+  AcceptLanguageResolver,
+  CookieResolver,
+  HeaderResolver,
+  I18nJsonParser,
+  I18nModule,
+  QueryResolver,
+} from 'nestjs-i18n';
 import path from 'path';
 
+import { AllExceptionsFilter } from './common/HttpExeption';
 import configuration from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { CatsModule } from './modules/cat/cats.module';
@@ -41,7 +50,19 @@ import { queryBuilder } from './providers/queryBuilder';
       }),
       parser: I18nJsonParser,
       inject: [ConfigService],
+      resolvers: [
+        { use: QueryResolver, options: ['lang', 'locale', 'l'] },
+        new HeaderResolver(['x-custom-lang']),
+        AcceptLanguageResolver,
+        new CookieResolver(['lang', 'locale', 'l']),
+      ],
     }),
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
   ],
 })
 export class AppModule {}

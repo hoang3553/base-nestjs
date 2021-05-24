@@ -71,7 +71,7 @@ export class User {
 
   @Prop({ select: false })
   @ApiPropertyOptional()
-  resetPassworxwxwwxxdExpire?: Date;
+  resetPasswordExpire?: Date;
 
   @ApiPropertyOptional()
   createdAt: Date;

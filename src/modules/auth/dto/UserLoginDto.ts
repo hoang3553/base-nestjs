@@ -10,6 +10,6 @@ export class UserLoginDto {
   email: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ minLength: 6 })
   password: string;
 }

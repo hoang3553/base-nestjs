@@ -13,12 +13,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
-  ) {
+  validate(accessToken: string, _: string, profile: any, done: VerifyCallback) {
     const { name, emails, photos } = profile;
     const user = {
       accessToken,

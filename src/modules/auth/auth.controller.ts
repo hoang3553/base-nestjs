@@ -63,7 +63,7 @@ export class AuthController {
       throw new HttpException(
         {
           status: HttpStatus.UNAUTHORIZED,
-          message: 'Sorry! This email has been used',
+          messageCode: 'auth.email_used',
         },
         HttpStatus.UNAUTHORIZED,
       );
