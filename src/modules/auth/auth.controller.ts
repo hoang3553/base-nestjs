@@ -11,8 +11,8 @@ import {
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { Auth, AuthUser } from '../../decorators';
-import { UserDto } from '../user/dto/UserDto';
 import { UserService } from '../user/user.service';
+import { User } from './../user/schemas/user.entity';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
@@ -83,16 +83,19 @@ export class AuthController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @Auth()
-  @ApiOkResponse({ type: UserDto, description: 'Current user info' })
-  getCurrentUser(@AuthUser() user) {
+  @ApiOkResponse({ type: User, description: 'Current user info' })
+  async getCurrentUser(@AuthUser() user): Promise<User> {
     return this.userService.findOne(user.id);
   }
 
   @Put('me')
   @HttpCode(HttpStatus.OK)
   @Auth()
-  @ApiOkResponse({ type: UserDto, description: 'Update user info' })
-  updateCurrentUser(@AuthUser() user, @Body() body: UserInfoDto) {
+  @ApiOkResponse({ type: User, description: 'Update user info' })
+  async updateCurrentUser(
+    @AuthUser() user,
+    @Body() body: UserInfoDto,
+  ): Promise<User> {
     return this.userService.updateOne(user.id, body);
   }
 
@@ -100,7 +103,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Auth()
   @ApiOkResponse({
-    type: UserDto,
     description: 'Change password for authenticated user',
   })
   changePassword(@AuthUser() user, @Body() body: ChangePasswordDto) {
@@ -110,7 +112,6 @@ export class AuthController {
   @Post('/forgotPassword')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: UserDto,
     description: 'Send email forget password for particular email',
   })
   forgotPassword(@Body() body: ForgotPasswordDto) {
@@ -120,7 +121,6 @@ export class AuthController {
   @Post('/resetPassword')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: UserDto,
     description: 'Reset password for particular email',
   })
   resetPassword() {

@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-import { IModel } from '../interfaces';
+import { IListDataPagination, IModel } from '../interfaces';
 
 export abstract class BaseService<T extends Document, V, X> {
   // eslint-disable-next-line @typescript-eslint/tslint/config
@@ -13,19 +13,19 @@ export abstract class BaseService<T extends Document, V, X> {
    */
   constructor(private readonly _model: IModel<T>) {}
 
-  async createOne(createBody: V) {
+  async createOne(createBody: V): Promise<T> {
     return this._model.create(createBody);
   }
 
-  findAll(query) {
+  findAll(query): Promise<IListDataPagination<T>> {
     return this._model.queryBuilder(query);
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<T> {
     return this._model.findById(id);
   }
 
-  async updateOne(id: string, updateBody: X) {
+  async updateOne(id: string, updateBody: X): Promise<T> {
     const record = await this._model.findById(id);
     if (!record) {
       throw Error('');

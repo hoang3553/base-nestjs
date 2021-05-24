@@ -13,9 +13,9 @@ import { UserPagingDto } from './dto/UserPagingDto';
 import { UsersPageDto } from './dto/UsersPageDto';
 import { UserService } from './user.service';
 
-@Controller('users')
-@ApiTags('users')
-export class UserController {
+@Controller('admin/users')
+@ApiTags('admin/users')
+export class AdminUserController {
   constructor(private _userService: UserService) {}
 
   @Get('/')

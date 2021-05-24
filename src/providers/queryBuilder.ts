@@ -43,7 +43,7 @@ export function queryBuilder(schema) {
     if (count) {
       return Promise.all([builder.lean().exec(), count.exec()]).then(
         (result) => ({
-          list: result[0],
+          data: result[0],
           total: result[1],
           page: query.page,
           perPage: query.perPage,

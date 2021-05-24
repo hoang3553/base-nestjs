@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 import { IModel } from '../../interfaces';
 import { UserRegisterDto } from '../auth/dto/UserRegisterDto';
-import { UsersPageDto } from './dto/UsersPageDto';
+import { UserPagingDto } from './dto/UserPagingDto';
 import { User, USER_ROLES, UserDocument } from './schemas/user.entity';
 
 @Injectable()
@@ -47,7 +47,7 @@ export class UserService {
     });
   }
 
-  getUsers(query): Promise<UsersPageDto> {
+  getUsers(query): Promise<UserPagingDto> {
     return this._model.queryBuilder(query);
   }
 }

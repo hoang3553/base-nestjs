@@ -11,9 +11,8 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { Auth } from '../../decorators';
-import { PageOptionsDto } from './../../common/dto/PageOptionsDto';
 import { CatsService } from './cats.service';
-import { CatPagingDto, CreateCatDto, UpdateCatDto } from './dto';
+import { CatPagingDto, CreateCatDto, QueryDto, UpdateCatDto } from './dto';
 import { Cat } from './schemas/cat.entity';
 
 @Controller('cats')
@@ -27,7 +26,7 @@ export class CatsController {
     description: 'Cat',
   })
   @Auth()
-  createOne(@Body() createCatDto: CreateCatDto) {
+  createOne(@Body() createCatDto: CreateCatDto): Promise<Cat> {
     return this._catsService.createOne(createCatDto);
   }
 
@@ -36,8 +35,7 @@ export class CatsController {
     type: CatPagingDto,
     description: 'CatList',
   })
-  findAll(@Query() query: PageOptionsDto): CatPagingDto {
-    // console.log(JSON.parse(query.filter))
+  findAll(@Query() query: QueryDto): Promise<CatPagingDto> {
     return this._catsService.findAll(query);
   }
 
@@ -46,7 +44,7 @@ export class CatsController {
     type: Cat,
     description: 'Cat',
   })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<Cat> {
     return this._catsService.findOne(id);
   }
 
@@ -55,12 +53,15 @@ export class CatsController {
     type: Cat,
     description: 'Cat',
   })
-  updateOne(@Param('id') id: string, @Body() updateCatDto: UpdateCatDto) {
+  updateOne(
+    @Param('id') id: string,
+    @Body() updateCatDto: UpdateCatDto,
+  ): Promise<Cat> {
     return this._catsService.updateOne(id, updateCatDto);
   }
 
   @Delete(':id')
-  removeOne(@Param('id') id: string) {
+  removeOne(@Param('id') id: string): Promise<string> {
     return this._catsService.removeOne(id);
   }
 }
